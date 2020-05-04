@@ -1,0 +1,18 @@
+{
+  "name": "dbus_tabs",
+  "version": "1.0.0",
+  "description": "control tabs from dbus",
+  "keywords": [
+    "dbus",
+    "tabs"
+  ],
+  "author": "Cubimon",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cubimon/dbus_tabs.git"
+  },
+  "dependencies": {
+    "web-ext": "^4.2.0"
+  }
+}

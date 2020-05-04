@@ -1,0 +1,7 @@
+{
+    "name": "dbus_tabs",
+    "description": "Host for native messaging",
+    "path": "/share/git/dbus-tabs/dbus.py",
+    "type": "stdio",
+    "allowed_extensions": ["dbus_tabs@cubimon.org"]
+}
