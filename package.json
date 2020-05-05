@@ -6,6 +6,9 @@
     "dbus",
     "tabs"
   ],
+  "scripts": {
+    "build": "web-ext build"
+  },
   "author": "Cubimon",
   "license": "MIT",
   "repository": {
