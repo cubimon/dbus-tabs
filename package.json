@@ -1,6 +1,6 @@
 {
   "name": "dbus_tabs",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "control tabs from dbus",
   "keywords": [
     "dbus",

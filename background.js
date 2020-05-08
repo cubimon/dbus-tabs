@@ -1,22 +1,74 @@
 let tabsCache = {}
 
 // tab created
-browser.tabs.onCreated.addListener((tab) => {
+browser.tabs.onCreated.addListener(tab => {
   tabsCache[tab.id] = tab.title
   nativePort.postMessage(tabsCache)
 })
 
 // tab removed
-browser.tabs.onRemoved.addListener((tabId) => {
+browser.tabs.onRemoved.addListener(tabId => {
   delete tabsCache[tabId]
   nativePort.postMessage(tabsCache)
 })
 
+// tab updated
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  console.log('title change')
+  console.log(changeInfo.title)
+  //browser.browserAction.setTitle({tabId: tabId, title: "hodor"});
+  browser.sessions.getTabValue(tabId, 'customTitle').then(customTitle => {
+    if (customTitle) {
+      // apply custom title
+      browser.tabs.executeScript(tabId, {
+        code: `document.title = '${customTitle}'`
+      })
+    } else {
+      // custom title doesn't exist
+      browser.sessions.removeTabValue(tabId, 'oldTitle')
+    }
+  })
+  /*browser.tabs.update(tabId, {
+    'muted': true
+  })*/
+})
+
 // activate/focus tab
 function activate(tabId) {
-  browser.tabs.update(parseInt(tabId), {active: true}, (tab) => {
+  browser.tabs.update(tabId, {active: true}, tab => {
     browser.windows.update(tab.windowId, {focused: true})
   })
+}
+
+// rename tab
+function rename(tabId, newTitle) {
+  if (newTitle == '') {
+    // restore old title
+    browser.sessions.removeTabValue(tabId, 'customTitle')
+    browser.sessions.getTabValue(tabId, 'oldTitle').then(oldTitle => {
+      if (oldTitle) {
+        // apply old title
+        browser.tabs.executeScript(tabId, {
+          code: `document.title = '${oldTitle}'`
+        })
+        browser.sessions.removeTabValue(tabId, 'oldTitle')
+      }
+    })
+  } else {
+    // save old title and apply new title
+    browser.tabs.get(tabId).then(tabInfo => {
+      console.log(tabInfo.title)
+      browser.sessions.getTabValue(tabId, 'oldTitle').then(oldTitle => {
+        if (!oldTitle) {
+          browser.sessions.setTabValue(tabId, 'oldTitle', tabInfo.title)
+        }
+      })
+      browser.sessions.setTabValue(tabId, 'customTitle', newTitle)
+      browser.tabs.executeScript(tabId, {
+        code: `document.title = '${newTitle}'`
+      })
+    })
+  }
 }
 
 // native interface
@@ -24,7 +76,10 @@ let nativePort = browser.runtime.connectNative('dbus_tabs')
 nativePort.onMessage.addListener(message => {
   switch(message.action) {
     case 'activate':
-      activate(message.tabId)
+      activate(parseInt(message.tabId))
+      break
+    case 'rename':
+      rename(parseInt(message.tabId), message.newTitle)
       break
   }
 })

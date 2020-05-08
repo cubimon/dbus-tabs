@@ -42,7 +42,11 @@ class BrowserTabs(object):
           <arg type='s' name='response' direction='out'/>
         </method>
         <method name='activate'>
-          <arg type='s' name='a' direction='in'/>
+          <arg type='t' name='tabId' direction='in'/>
+        </method>
+        <method name='rename'>
+          <arg type='t' name='tabId' direction='in'/>
+          <arg type='s' name='newTitle' direction='in'/>
         </method>
       </interface>
     </node>
@@ -52,10 +56,18 @@ class BrowserTabs(object):
     global tabs
     return json.dumps(tabs)
 
-  def activate(self, s):
+  def activate(self, tab_id):
     message = {
       'action': 'activate',
-      'tabId': s
+      'tabId': str(tab_id)
+    }
+    sendMessage(encodeMessage(message))
+
+  def rename(self, tab_id, new_title):
+    message = {
+      'action': 'rename',
+      'tabId': str(tab_id),
+      'newTitle': new_title
     }
     sendMessage(encodeMessage(message))
 
