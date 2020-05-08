@@ -1,5 +1,7 @@
 module.exports = {
   ignoreFiles: [
+    '*.jpg',
+    'dbus-test.py',
     'dbus.py',
     'dbus_tabs.json',
     'install_native.sh',
