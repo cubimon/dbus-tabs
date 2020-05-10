@@ -14,8 +14,6 @@ browser.tabs.onRemoved.addListener(tabId => {
 
 // tab updated
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log('title change')
-  console.log(changeInfo.title)
   //browser.browserAction.setTitle({tabId: tabId, title: "hodor"});
   browser.sessions.getTabValue(tabId, 'customTitle').then(customTitle => {
     if (customTitle) {
@@ -57,7 +55,6 @@ function rename(tabId, newTitle) {
   } else {
     // save old title and apply new title
     browser.tabs.get(tabId).then(tabInfo => {
-      console.log(tabInfo.title)
       browser.sessions.getTabValue(tabId, 'oldTitle').then(oldTitle => {
         if (!oldTitle) {
           browser.sessions.setTabValue(tabId, 'oldTitle', tabInfo.title)
