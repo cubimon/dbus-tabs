@@ -10,6 +10,8 @@ from pydbus import SessionBus
 
 global tabs
 tabs = {}
+global activeTabId
+activeTabId = -1
 
 def getMessage():
   rawLength = sys.stdin.buffer.read(4)
@@ -30,8 +32,13 @@ def sendMessage(encodedMessage):
   sys.stdout.buffer.flush()
 
 def handler(channel, sender=None):
-  global tabs
-  tabs = getMessage()
+  message = getMessage()
+  if 'tabs' in message:
+    global tabs
+    tabs = message['tabs']
+  if 'activeTabId' in message:
+    global activeTabId
+    activeTabId = message['activeTabId']
   return True
 
 class BrowserTabs(object):
@@ -39,7 +46,7 @@ class BrowserTabs(object):
     <node>
       <interface name='org.cubimon.BrowserTabs'>
         <method name='tabs'>
-          <arg type='s' name='response' direction='out'/>
+          <arg type='s' name='tabs' direction='out'/>
         </method>
         <method name='activate'>
           <arg type='t' name='tabId' direction='in'/>
@@ -47,6 +54,9 @@ class BrowserTabs(object):
         <method name='rename'>
           <arg type='t' name='tabId' direction='in'/>
           <arg type='s' name='newTitle' direction='in'/>
+        </method>
+        <method name='activeTabId'>
+          <arg type='t' name='tabId' direction='out'/>
         </method>
       </interface>
     </node>
@@ -56,20 +66,25 @@ class BrowserTabs(object):
     global tabs
     return json.dumps(tabs)
 
-  def activate(self, tab_id):
+  def activate(self, tabId):
     message = {
       'action': 'activate',
-      'tabId': str(tab_id)
+      'tabId': str(tabId)
     }
     sendMessage(encodeMessage(message))
 
-  def rename(self, tab_id, new_title):
+  def rename(self, tabId, newTitle):
     message = {
       'action': 'rename',
-      'tabId': str(tab_id),
-      'newTitle': new_title
+      'tabId': str(tabId),
+      'newTitle': newTitle
     }
     sendMessage(encodeMessage(message))
+
+  def activeTabId(self):
+    global activeTabId
+    return activeTabId
+
 
 #sys.stdin = sys.stdin.detach()
 #sys.stdout = sys.stdout.detach()

@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "dbus tabs",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "control tabs from dbus",
   "browser_specific_settings": {
     "gecko": {

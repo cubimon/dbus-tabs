@@ -1,20 +1,30 @@
 let tabsCache = {}
+let activeTabId = -1
 
 // tab created
 browser.tabs.onCreated.addListener(tab => {
   tabsCache[tab.id] = tab.title
-  nativePort.postMessage(tabsCache)
+  nativePort.postMessage({
+    tabs: tabsCache
+  })
 })
 
 // tab removed
 browser.tabs.onRemoved.addListener(tabId => {
   delete tabsCache[tabId]
-  nativePort.postMessage(tabsCache)
+  nativePort.postMessage({
+    tabs: tabsCache
+  })
 })
 
 // tab updated
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  //browser.browserAction.setTitle({tabId: tabId, title: "hodor"});
+  if ('title' in changeInfo) {
+    tabsCache[tabId] = changeInfo.title
+    nativePort.postMessage({
+      tabs: tabsCache
+    })
+  }
   browser.sessions.getTabValue(tabId, 'customTitle').then(customTitle => {
     if (customTitle) {
       // apply custom title
@@ -26,9 +36,14 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       browser.sessions.removeTabValue(tabId, 'oldTitle')
     }
   })
-  /*browser.tabs.update(tabId, {
-    'muted': true
-  })*/
+})
+
+// tab activated
+browser.tabs.onActivated.addListener((activeInfo) => {
+  activeTabId = activeInfo.tabId
+  nativePort.postMessage({
+    activeTabId: activeTabId
+  })
 })
 
 // activate/focus tab
@@ -86,5 +101,11 @@ browser.tabs.query({}).then(tabs => {
   for (let tab of tabs) {
     tabsCache[tab.id] = tab.title
   }
-  nativePort.postMessage(tabsCache)
+  nativePort.postMessage({
+    tabs: tabsCache
+  })
+})
+activeTabId = browser.tabs.getCurrent().tabId
+nativePort.postMessage({
+  activeTabId: activeTabId
 })
